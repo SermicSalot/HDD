@@ -17,15 +17,15 @@ client.on(`messageCreate`, msg => {
         if (msg.mentions.users.has("1025959300335673364")) { // HDD bot ID
             msg.guild.members.fetch({user: '266744954922074112', withPresences: true, force: true}) //HonBot ID
                 .then(HonBot => {
-                    if (HonBot.presence.status == "offline") {
+                    if (HonBot.presence == null) {
                         msg.channel.send(`HonBot seems to be offline`);
                     }
-                    if (HonBot.presence.status == "online") {
+                    if (HonBot.presence?.status == "online") {
                         msg.channel.send(`HonBot appears to be online. If commands aren't working, you may be banished.`);
                     }
                 })
                 .catch(() => {
-                    msg.channel.send(`Some Error occurred, most likely Honbot isn't in this server.`); //Super Jank but IDC
+                    msg.channel.send(`Some Error occurred, most likely HonBot isn't in this server.`); //Super Jank but IDC
                 })
         }
     }
