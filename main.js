@@ -21,6 +21,7 @@ client.on(`presenceUpdate`, (oldPresence, newPresence) => {
             load();
             HonBotStats.Online = true;
             HonBotStats.DowntimeSeconds += (Date.now() - HonBotStats.lastUpdate)/1000;
+            HonBotStats.lastDowntime.time += (Date.now() - HonBotStats.lastUpdate);
             HonBotStats.lastUpdate = Date.now();
             save(HonBotStats);
         }
@@ -30,6 +31,7 @@ client.on(`presenceUpdate`, (oldPresence, newPresence) => {
         load();
         HonBotStats.Online = true;
         HonBotStats.DowntimeSeconds += (Date.now() - HonBotStats.lastUpdate)/1000;
+        HonBotStats.lastDowntime.time += (Date.now() - HonBotStats.lastUpdate);
         HonBotStats.lastUpdate = Date.now();
         save(HonBotStats);
         return;
@@ -38,6 +40,8 @@ client.on(`presenceUpdate`, (oldPresence, newPresence) => {
         load();
         HonBotStats.Online = false;
         HonBotStats.UptimeSeconds += (Date.now() - HonBotStats.lastUpdate)/1000;
+        HonBotStats.lastDowntime.time = 0;
+        HonBotStats.lastDowntime.date = Date.now();
         HonBotStats.lastUpdate = Date.now();
         save(HonBotStats);
         return;
@@ -57,15 +61,17 @@ client.on(`messageCreate`, msg => {
             }
             else { //still updating stats
                 HonBotStats.DowntimeSeconds += (Date.now() - HonBotStats.lastUpdate)/1000;
+                HonBotStats.lastDowntime.time += (Date.now() - HonBotStats.lastUpdate)
                 HonBotStats.lastUpdate = Date.now();
                 save(HonBotStats);
             }
             let message = ``;
             if (HonBotStats.Online) {
-                message = `HonBot is currently online!`
+                let date = new Date(HonBotStats.lastDowntime.date).toString().split(` `);
+                message = `HonBot is currently online!\nHonBot was last down on ${date[0]} ${date[1]} ${date[2]} ${date[3]} ${date[4]} for ${convertTime(HonBotStats.lastDowntime.time)} (HH:MM:SS).`;
             }
             else {
-                message = `HonBot is currently offline!`
+                message = `HonBot is currently offline!\nHonBot has been down for ${convertTime(HonBotStats.lastDowntime.time)} (HH:MM:SS).`
             }
             msg.channel.send(`${message}\nHonBot's uptime percentage is ${(100*HonBotStats.UptimeSeconds/(HonBotStats.UptimeSeconds + HonBotStats.DowntimeSeconds)).toPrecision(4)}%!`);
         }
@@ -89,6 +95,8 @@ function fetchHonBotStatus() {
                 load();
                 HonBotStats.Online = false;
                 HonBotStats.lastUpdate = Date.now();
+                HonBotStats.lastDowntime.date = Date.now();
+                HonBotStats.lastDowntime.time = 0;
                 save(HonBotStats);
                 return;
             }
@@ -104,4 +112,32 @@ function fetchHonBotStatus() {
             console.log(`Error in function fetchHonBotStatus:\n${err}`)
         });
     return;
+}
+function convertTime(milliseconds) { //Converts milliseconds to HH:MM:SS format
+    let hours = 0
+    let minutes = 0
+    let seconds = 0
+    let string = ""
+    hours = Math.floor(milliseconds/3600000)
+    minutes = Math.floor((milliseconds%3600000)/60000)
+    seconds = Math.floor(((milliseconds%3600000)%60000)/1000)
+    if (hours < 10) {
+        string += `0${hours}:`
+    }
+    else {
+        string += `${hours}:`
+    }
+    if (minutes < 10) {
+        string += `0${minutes}:`
+    }
+    else {
+        string += `${minutes}:`
+    }
+    if (seconds < 10) {
+        string += `0${seconds}`
+    }
+    else {
+        string += `${seconds}`
+    }
+    return string;
 }

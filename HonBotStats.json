@@ -1,6 +1,10 @@
 {
     "UptimeSeconds": 0,
     "DowntimeSeconds": 0,
-    "Online": false,
-    "lastUpdate": 1665002087719
+    "Online": true,
+    "lastUpdate": 0,
+    "lastDowntime": {
+        "date": 0,
+        "time": 0
+    }
 }
